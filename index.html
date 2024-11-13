@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art Gallery</title>
+</head>
+<body>
+    <h1>Art Gallery</h1>
+    
+    <div id="left-pane">
+        <h2>Paintings</h2>
+        <div id="paintingList"></div>
+    </div>
+
+    <div id="right-pane">
+        <h2>Edit Painting</h2>
+        <form id="paintingForm">
+            <label for="title">Title:</label><br>
+            <input type="text" id="title"><br>
+
+            <label for="artist">Artist:</label><br>
+            <input type="text" id="artist"><br>
+
+            <label for="year">Year:</label><br>
+            <input type="number" id="year"><br>
+
+            <label for="medium">Medium:</label><br>
+            <input type="text" id="medium"><br>
+
+            <label for="description">Description:</label><br>
+            <textarea id="description"></textarea><br>
+
+            <button type="button" id="saveButton">Save</button>
+            <button type="button" id="resetButton">Reset</button>
+        </form>
+    </div>
+
+    <script>
+        // Fetch and display all paintings
+        fetch('/paintings')
+            .then(response => response.json())
+            .then(paintings => {
+                const list = document.getElementById('paintingList');
+                paintings.forEach(painting => {
+                    const button = document.createElement('button');
+                    button.textContent = painting.title;
+                    button.addEventListener('click', () => populateForm(painting));
+                    list.appendChild(button);
+                });
+            });
+
+        // Populate the form with painting data
+        function populateForm(painting) {
+            document.getElementById('title').value = painting.title;
+            document.getElementById('artist').value = painting.artist;
+            document.getElementById('year').value = painting.year;
+            document.getElementById('medium').value = painting.medium;
+            document.getElementById('description').value = painting.description;
+
+            // Save button functionality
+            document.getElementById('saveButton').onclick = () => {
+                const updatedPainting = {
+                    title: document.getElementById('title').value,
+                    artist: document.getElementById('artist').value,
+                    year: document.getElementById('year').value,
+                    medium: document.getElementById('medium').value,
+                    description: document.getElementById('description').value
+                };
+
+                fetch(`/paintings/${painting._id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedPainting)
+                })
+                .then(response => response.json())
+                .then(updated => alert('Painting updated!'))
+                .catch(err => console.error(err));
+            };
+
+            // Reset button functionality
+            document.getElementById('resetButton').onclick = () => {
+                populateForm(painting);
+            };
+        }
+    </script>
+</body>
+</html>
